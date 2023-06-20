@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">Weather</string>
+    <string name="hours">Hours</string>
+    <string name="days">Days</string>
+    <string name="search_place">Search place</string>
+    <string name="sync_data">Sync data</string>
+
 </resources>
