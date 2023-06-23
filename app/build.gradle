@@ -46,6 +46,9 @@ dependencies {
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
 
+    //Fragment
+    implementation 'androidx.fragment:fragment-ktx:1.6.0'
+
     //Coroutines
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4"
@@ -60,6 +63,9 @@ dependencies {
     implementation "com.squareup.okhttp3:okhttp:4.9.3"
     implementation "com.squareup.okhttp3:logging-interceptor:4.9.0"
 
+    //Picasso
+    implementation 'com.squareup.picasso:picasso:2.8'
+
     //Room
     implementation "androidx.room:room-runtime:2.5.1"
     annotationProcessor "androidx.room:room-compiler:2.5.1"
@@ -72,4 +78,7 @@ dependencies {
 
     //Material Components
     implementation 'com.google.android.material:material:1.9.0'
+
+    //Location
+    implementation 'com.google.android.gms:play-services-location:21.0.1'
 }

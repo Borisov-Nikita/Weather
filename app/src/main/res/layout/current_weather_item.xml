@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingTop="72dp"
+    tools:background="?attr/colorPrimary">
+
+    <ImageView
+        android:id="@+id/weather_image_view"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:contentDescription="@string/condition_image"
+        app:layout_constraintBottom_toBottomOf="@+id/temp_text_view"
+        app:layout_constraintEnd_toStartOf="@+id/temp_text_view"
+        app:layout_constraintHorizontal_chainStyle="packed"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/temp_text_view"
+        tools:src="@drawable/ic_launcher_foreground" />
+
+
+    <TextView
+        android:id="@+id/temp_text_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="sans-serif"
+        android:textColor="?attr/colorOnPrimary"
+        android:textSize="70sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/weather_image_view"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="20ºC" />
+
+    <TextView
+        android:id="@+id/condition_text_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:fontFamily="sans-serif"
+        android:textColor="?attr/colorOnPrimary"
+        android:textSize="16sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/temp_text_view"
+        tools:text="Sunny" />
+
+    <TextView
+        android:id="@+id/feels_like_temp_text_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:fontFamily="sans-serif"
+        android:textColor="?attr/colorOnPrimary"
+        android:textSize="16sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/condition_text_view"
+        tools:text="Feels like 18ºC" />
+
+    <LinearLayout
+        android:id="@+id/wind_linear_layout"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        android:orientation="vertical"
+        android:padding="4dp"
+        app:layout_constraintBottom_toTopOf="@+id/date_time_text_view"
+        app:layout_constraintEnd_toStartOf="@+id/precipitation_linear_layout"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/feels_like_temp_text_view">
+
+        <TextView
+            android:id="@+id/wind_text_view"
+            style="@style/currentWeatherItemValueTextStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:layout_marginBottom="12dp"
+            android:fontFamily="sans-serif"
+            tools:text="12 kmph" />
+
+        <TextView
+            style="@style/currentWeatherItemDescriptionTextStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="sans-serif"
+            android:gravity="center"
+            android:text="@string/wind"
+            android:textAllCaps="true" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/precipitation_linear_layout"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        android:orientation="vertical"
+        android:padding="4dp"
+        app:layout_constraintBottom_toTopOf="@+id/date_time_text_view"
+        app:layout_constraintEnd_toStartOf="@+id/humidity_linear_layout"
+        app:layout_constraintStart_toEndOf="@+id/wind_linear_layout"
+        app:layout_constraintTop_toBottomOf="@+id/feels_like_temp_text_view">
+
+        <TextView
+            android:id="@+id/precipitation_text_view"
+            style="@style/currentWeatherItemValueTextStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:layout_marginBottom="12dp"
+            android:fontFamily="sans-serif"
+            tools:text="12 %" />
+
+        <TextView
+            style="@style/currentWeatherItemDescriptionTextStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="sans-serif"
+            android:gravity="center"
+            android:text="@string/rainfall"
+            android:textAllCaps="true" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/humidity_linear_layout"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        android:orientation="vertical"
+        android:padding="4dp"
+        app:layout_constraintBottom_toTopOf="@+id/date_time_text_view"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/precipitation_linear_layout"
+        app:layout_constraintTop_toBottomOf="@+id/feels_like_temp_text_view">
+
+        <TextView
+            android:id="@+id/humidity_text_view"
+            style="@style/currentWeatherItemValueTextStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:layout_marginBottom="12dp"
+            android:fontFamily="sans-serif"
+            tools:text="60 %" />
+
+        <TextView
+            style="@style/currentWeatherItemDescriptionTextStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="sans-serif"
+            android:gravity="center"
+            android:text="@string/humidity"
+            android:textAllCaps="true" />
+
+    </LinearLayout>
+
+
+    <TextView
+        android:id="@+id/date_time_text_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        android:fontFamily="sans-serif"
+        android:textColor="?attr/colorOnPrimary"
+        android:textSize="12sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        tools:text="Last update 16.06.2023 9:20" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

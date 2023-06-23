@@ -1,3 +1,16 @@
 <resources>
     <string name="app_name">Weather</string>
+    <string name="hours">Hours</string>
+    <string name="days">Days</string>
+    <string name="search_location">Search location</string>
+    <string name="wind">Wind</string>
+    <string name="humidity">Humidity</string>
+    <string name="rainfall">Rainfall</string>
+    <string name="refresh_forecast">Refresh forecast</string>
+    <string name="enter_location">Enter location</string>
+    <string name="search">Search</string>
+    <string name="condition_image">Condition image</string>
+    <string name="retry">Retry</string>
+    <string name="common_error">Something went wrong! Please check your network connection and enable location service.</string>
+
 </resources>
