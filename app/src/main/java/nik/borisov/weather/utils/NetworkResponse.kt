@@ -20,7 +20,7 @@ abstract class NetworkResponse {
         }
     }
 
-    private fun <T> getErrorResult(error: String): DataResult.Error<T> {
-        return DataResult.Error(message = "Network call failed: $error")
+    private fun <T> getErrorResult(error: String): DataResult.NetworkError<T> {
+        return DataResult.NetworkError(message = "Network call failed: $error")
     }
 }

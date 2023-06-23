@@ -6,6 +6,8 @@ sealed class DataResult<T>(
 ) {
 
     class Success<T>(data: T?) : DataResult<T>(data = data)
-    class Error<T>(message: String?) : DataResult<T>(message = message)
+    class NetworkError<T>(message: String?) : DataResult<T>(message = message)
+    class DatabaseError<T>(message: String?) : DataResult<T>(message = message)
+    class LocationError<T>(message: String?) : DataResult<T>(message = message)
     class Loading<T>() : DataResult<T>()
 }

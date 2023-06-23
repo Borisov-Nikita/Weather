@@ -5,12 +5,11 @@ data class ForecastHourUi(
     val time: String,
     val conditionText: String,
     val conditionIcon: String,
-    val temp: String,
+    val temp: CharSequence,
     val tempFeelsLike: String,
-    val windSpeed: String,
+    val windSpeed: CharSequence,
     val windDirection: String,
     val windGust: String,
-    val humidity: String,
-    val chanceOfRain: String,
-    val chanceOfSnow: String
+    val humidity: CharSequence,
+    val chanceOfPrecipitation: CharSequence
 )

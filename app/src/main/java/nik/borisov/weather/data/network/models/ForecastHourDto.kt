@@ -20,8 +20,8 @@ data class ForecastHourDto(
     val windGust: Double,
     @SerializedName("humidity")
     val humidity: Int,
-    @SerializedName("daily_chance_of_rain")
+    @SerializedName("chance_of_rain")
     val chanceOfRain: Int,
-    @SerializedName("daily_chance_of_snow")
+    @SerializedName("chance_of_snow")
     val chanceOfSnow: Int
 )

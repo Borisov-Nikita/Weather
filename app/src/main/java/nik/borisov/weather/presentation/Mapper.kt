@@ -1,99 +1,144 @@
 package nik.borisov.weather.presentation
 
+import android.text.SpannableString
+import android.text.TextUtils
+import nik.borisov.weather.domain.entities.DateTimeInfoItem
 import nik.borisov.weather.domain.entities.ForecastCommonItem
 import nik.borisov.weather.domain.entities.ForecastDayItem
 import nik.borisov.weather.domain.entities.ForecastHourItem
-import nik.borisov.weather.domain.entities.ForecastItem
 import nik.borisov.weather.presentation.models.CurrentWeatherUi
 import nik.borisov.weather.presentation.models.ForecastCommonUi
 import nik.borisov.weather.presentation.models.ForecastDayUi
 import nik.borisov.weather.presentation.models.ForecastHourUi
-import nik.borisov.weather.utils.TimeConverter
+import nik.borisov.weather.utils.DateTimeHelper
+import nik.borisov.weather.utils.TopAlignSuperscriptSpan
 import java.time.ZonedDateTime
 import javax.inject.Inject
 import kotlin.math.roundToInt
 
-class Mapper @Inject constructor() : TimeConverter {
+class Mapper @Inject constructor() : DateTimeHelper {
 
     fun mapForecastCommonItemToUi(item: ForecastCommonItem): ForecastCommonUi {
         return ForecastCommonUi(
             location = item.location.name,
-            currentWeather = getCurrentHourForecast(item.forecast, item.timeZone),
-            forecastDays = getForecastDayList(item.forecast, item.timeZone),
-            forecastHours = getTwentyFourHoursForecasts(item.forecast, item.timeZone)
+            currentWeather = getCurrentHourForecast(item),
+            forecastDays = item.forecastDays.map {
+                mapForecastDayItemToUi(
+                    it,
+                    item.dateTimeInfo.timeZone
+                )
+            },
+            forecastHours = getTwentyFourHoursForecasts(
+                item.forecastHours,
+                item.dateTimeInfo.timeZone
+            )
         )
     }
 
-//    private fun mapCurrentWeatherItemToUi(
-//        item: CurrentWeatherItem,
-//        timeZoneId: String
-//    ): CurrentWeatherUi {
-//        return CurrentWeatherUi(
-//            lastUpdate = convertTimeDateFromEpochToString(
-//                item.lastUpdateEpoch,
-//                timeZoneId,
-//                "dd MMM HH:mm"
-//            ),
-//            conditionText = item.conditionText,
-//            conditionIcon = "https:${item.conditionIcon}",
-//            temp = buildString {
-//                append(
-//                    item.temp.roundToInt().toString(),
-//                    "ºC"
-//                )
-//            },
-//            tempFeelsLike = item.tempFeelsLike.roundToInt().toString(),
-//            windSpeed = item.windSpeed.roundToInt().toString(),
-//            windDirection = item.windDirection,
-//            windGust = item.windGust.roundToInt().toString(),
-//            humidity = item.humidity.toString()
-//        )
-//    }
+    private fun getCurrentHourForecast(
+        item: ForecastCommonItem
+    ): CurrentWeatherUi {
+        return mapCurrentWeatherUi(
+            item.forecastDays.first { it.dateEpoch == getCurrentDayEpoch() },
+            item.forecastHours.first { it.timeEpoch == getCurrentHourEpoch() },
+            item.dateTimeInfo
+        )
+    }
 
     private fun mapCurrentWeatherUi(
         forecastDayItem: ForecastDayItem,
         forecastHourItem: ForecastHourItem,
-        timeZoneId: String
+        dateTimeInfoItem: DateTimeInfoItem
     ): CurrentWeatherUi {
         return CurrentWeatherUi(
-            lastUpdate = convertTimeDateFromEpochToString(
-                forecastDayItem.dateEpoch,
-                timeZoneId,
-                "dd MMM HH:mm"
-            ),
-            conditionText = forecastHourItem.conditionText,
-            conditionIcon = "https:${forecastHourItem.conditionIcon}",
-            temp = buildString {
+            lastUpdate = buildString {
                 append(
-                    forecastHourItem.temp.roundToInt().toString(),
-                    "ºC"
+                    "Last update ",
+                    convertTimeDateFromEpochToString(
+                        dateTimeInfoItem.lastUpdateTimeEpoch,
+                        dateTimeInfoItem.timeZone,
+                        "dd MMM HH:mm"
+                    )
                 )
             },
-            tempFeelsLike = forecastHourItem.tempFeelsLike.roundToInt().toString(),
-            windSpeed = forecastHourItem.windSpeed.roundToInt().toString(),
+            conditionText = forecastHourItem.conditionText,
+            conditionIcon = "https:${forecastHourItem.conditionIcon}",
+            temp = getSpannableValueMeasureString(
+                forecastHourItem.temp.roundToInt().toString(),
+                "ºC"
+            ),
+            tempFeelsLike = buildString {
+                append(
+                    "Feels like ",
+                    getSpannableValueMeasureString(
+                        forecastHourItem.tempFeelsLike.roundToInt().toString(),
+                        "ºC"
+                    )
+                )
+            },
+            maxMinTemp = getSpannableValueMeasureString(
+                buildString {
+                    append(
+                        forecastDayItem.maxTemp.roundToInt().toString(),
+                        "/",
+                        forecastDayItem.minTemp.roundToInt().toString()
+                    )
+                },
+                "ºC"
+            ),
+            windSpeed = getSpannableValueMeasureString(
+                forecastHourItem.windSpeed.roundToInt().toString(),
+                "kmph"
+            ),
             windDirection = forecastHourItem.windDirection,
-            windGust = forecastHourItem.windGust.roundToInt().toString(),
-            humidity = forecastHourItem.humidity.toString()
+            windGust = getSpannableValueMeasureString(
+                forecastHourItem.windGust.roundToInt().toString(),
+                "kmph"
+            ),
+            humidity = getSpannableValueMeasureString(
+                forecastHourItem.humidity.toString(),
+                "%"
+            ),
+            chanceOfPrecipitation = getSpannableValueMeasureString(
+                maxOf(
+                    forecastHourItem.chanceOfRain,
+                    forecastHourItem.chanceOfSnow
+                ).toString(),
+                "%"
+            ),
         )
     }
 
     private fun mapForecastDayItemToUi(item: ForecastDayItem, timeZoneId: String): ForecastDayUi {
         return ForecastDayUi(
-            date = convertTimeDateFromEpochToString(item.dateEpoch, timeZoneId, "dd MMM"),
+            date = convertTimeDateFromEpochToString(item.dateEpoch, timeZoneId, "E (dd MMM)"),
             conditionText = item.conditionText,
             conditionIcon = "https:${item.conditionIcon}",
-            maxMinTemp = buildString {
-                append(
-                    item.maxTemp.roundToInt().toString(),
-                    "/",
-                    item.minTemp.roundToInt().toString(),
-                    "ºC"
-                )
-            },
-            maxWindSpeed = item.maxWindSpeed.roundToInt().toString(),
-            avgHumidity = item.avgHumidity.toString(),
-            chanceOfRain = item.chanceOfRain.toString(),
-            chanceOfSnow = item.chanceOfSnow.toString()
+            maxMinTemp = getSpannableValueMeasureString(
+                buildString {
+                    append(
+                        item.maxTemp.roundToInt().toString(),
+                        "/",
+                        item.minTemp.roundToInt().toString()
+                    )
+                },
+                "ºC"
+            ),
+            maxWindSpeed = getSpannableValueMeasureString(
+                item.maxWindSpeed.roundToInt().toString(),
+                "kmph"
+            ),
+            avgHumidity = getSpannableValueMeasureString(
+                item.avgHumidity.toString(),
+                "%"
+            ),
+            chanceOfPrecipitation = getSpannableValueMeasureString(
+                maxOf(
+                    item.chanceOfRain,
+                    item.chanceOfSnow
+                ).toString(),
+                "%"
+            )
         )
     }
 
@@ -105,61 +150,58 @@ class Mapper @Inject constructor() : TimeConverter {
             time = convertTimeDateFromEpochToString(item.timeEpoch, timeZoneId, "HH:mm"),
             conditionText = item.conditionText,
             conditionIcon = "https:${item.conditionIcon}",
-            temp = buildString {
-                append(
-                    item.temp.roundToInt().toString(),
-                    "ºC"
-                )
-            },
+            temp = getSpannableValueMeasureString(
+                item.temp.roundToInt().toString(),
+                "ºC"
+            ),
             tempFeelsLike = item.tempFeelsLike.roundToInt().toString(),
-            windSpeed = item.windSpeed.roundToInt().toString(),
+            windSpeed = getSpannableValueMeasureString(
+                item.windSpeed.roundToInt().toString(),
+                "kmph"
+            ),
             windDirection = item.windDirection,
             windGust = item.windGust.roundToInt().toString(),
-            humidity = item.humidity.toString(),
-            chanceOfRain = item.chanceOfRain.toString(),
-            chanceOfSnow = item.chanceOfSnow.toString(),
+            humidity = getSpannableValueMeasureString(
+                item.humidity.toString(),
+                "%"
+            ),
+            chanceOfPrecipitation = getSpannableValueMeasureString(
+                maxOf(
+                    item.chanceOfRain,
+                    item.chanceOfSnow
+                ).toString(),
+                "%"
+            )
         )
-    }
-
-    private fun getCurrentHourForecast(
-        items: List<ForecastItem>,
-        timeZoneId: String
-    ): CurrentWeatherUi {
-        val desiredForecastItem =
-            items.filter { it.forecastDay.dateEpoch == getCurrentDayEpoch() }.let { it[0] }
-        return mapCurrentWeatherUi(
-            desiredForecastItem.forecastDay,
-            desiredForecastItem.forecastHours.filter { it.timeEpoch == getCurrentHourEpoch() }
-                .let { it[0] },
-            timeZoneId
-        )
-    }
-
-    private fun getForecastDayList(
-        forecastItemList: List<ForecastItem>,
-        timeZoneId: String
-    ): List<ForecastDayUi> {
-        return mutableListOf<ForecastDayUi>().apply {
-            for (item in forecastItemList) {
-                add(mapForecastDayItemToUi(item.forecastDay, timeZoneId))
-            }
-        }.toList()
     }
 
     private fun getTwentyFourHoursForecasts(
-        forecastItemList: List<ForecastItem>,
+        forecastItemList: List<ForecastHourItem>,
         timeZoneId: String
     ): List<ForecastHourUi> {
         val timeNow = ZonedDateTime.now().toEpochSecond()
         val timePlusTwentyFourHours = ZonedDateTime.now().plusHours(24).toEpochSecond()
         return mutableListOf<ForecastHourUi>().apply {
-            for (item in forecastItemList) {
-                addAll(item.forecastHours.filter {
-                    it.timeEpoch in timeNow..timePlusTwentyFourHours
-                }.map {
-                    mapForecastHourItemToUi(it, timeZoneId)
-                })
-            }
+            addAll(forecastItemList.filter {
+                it.timeEpoch in timeNow..timePlusTwentyFourHours
+            }.map {
+                mapForecastHourItemToUi(it, timeZoneId)
+            })
         }.toList()
+    }
+
+    private fun getSpannableValueMeasureString(
+        value: String,
+        measure: String
+    ): CharSequence {
+        val valueSpan = SpannableString(value)
+        val measureSpan = SpannableString(measure)
+        measureSpan.setSpan(
+            TopAlignSuperscriptSpan(),
+            0,
+            measure.length,
+            SpannableString.SPAN_INCLUSIVE_INCLUSIVE
+        )
+        return TextUtils.concat(valueSpan, measureSpan)
     }
 }

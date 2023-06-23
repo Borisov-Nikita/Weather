@@ -19,6 +19,9 @@ import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
 import com.google.android.gms.tasks.CancellationTokenSource
 import nik.borisov.weather.R
+import nik.borisov.weather.presentation.fragments.ErrorFragment
+import nik.borisov.weather.presentation.fragments.LoadingFragment
+import nik.borisov.weather.presentation.fragments.LocationFragment
 import nik.borisov.weather.presentation.fragments.MainFragment
 import nik.borisov.weather.presentation.viewmodels.MainViewModel
 import nik.borisov.weather.presentation.viewmodels.ViewModelFactory
@@ -52,16 +55,15 @@ class MainActivity : AppCompatActivity(), DialogManager {
         setContentView(R.layout.activity_main)
         if (savedInstanceState == null) {
             checkPermission()
-
-
-
+            setViewModelState()
             observeViewModel()
+            showFragmentWithoutBackStack(LoadingFragment.newInstance(), "Loading")
         }
     }
 
     override fun onResume() {
         super.onResume()
-        setViewModelState()
+        refreshViewModelState()
     }
 
     private fun setViewModelState() {
@@ -73,17 +75,32 @@ class MainActivity : AppCompatActivity(), DialogManager {
         )
     }
 
+    private fun refreshViewModelState() {
+        viewModel.refreshServiceState(
+            ServiceState(
+                isNetworkEnabled = isNetworkEnabled(),
+                isLocationEnabled = checkLocationService()
+            )
+        )
+    }
+
     private fun observeViewModel() {
-        viewModel.fragmentState.observe(this) {
+        viewModel.viewModelState.observe(this) {
             when (it) {
                 is ShowForecastFragment -> {
-                    showFragment(MainFragment.newInstance())
+                    showFragmentWithoutBackStack(MainFragment.newInstance(), "Forecast")
                 }
-                is EnterLocationFragment -> {
-//                    showFragment()
+                is ShowLocationFragment -> {
+                    showFragmentWithBackStack(LocationFragment.newInstance(), "Location")
+                }
+                is ShowLoading -> {
+                    showFragmentWithoutBackStack(LoadingFragment.newInstance(), "Loading")
                 }
                 is ShowErrorFragment -> {
-//                    showFragment()
+                    showFragmentWithoutBackStack(ErrorFragment.newInstance(), "Error")
+                }
+                is SetViewModelState -> {
+                    setViewModelState()
                 }
                 is GetLocationFromService -> {
                     getCurrentLocation()
@@ -141,7 +158,7 @@ class MainActivity : AppCompatActivity(), DialogManager {
             Priority.PRIORITY_LOW_POWER,
             cancellationTokenSource.token
         ).addOnCompleteListener {
-            viewModel.downloadForecast("${it.result.latitude},${it.result.longitude}")
+            viewModel.getForecast("${it.result.latitude},${it.result.longitude}")
         }
     }
 
@@ -158,10 +175,23 @@ class MainActivity : AppCompatActivity(), DialogManager {
         }
     }
 
-    private fun showFragment(instance: Fragment) {
-        supportFragmentManager.beginTransaction()
-            .replace(R.id.main_fragment_container, instance)
-            .commit()
+    private fun showFragmentWithBackStack(instance: Fragment, tag: String) {
+        val currentInstance = supportFragmentManager.findFragmentByTag(tag)
+        if (currentInstance == null) {
+            supportFragmentManager.beginTransaction()
+                .replace(R.id.main_fragment_container, instance, tag)
+                .addToBackStack(null)
+                .commit()
+        }
+    }
+
+    private fun showFragmentWithoutBackStack(instance: Fragment, tag: String) {
+        val currentInstance = supportFragmentManager.findFragmentByTag(tag)
+        if (currentInstance == null) {
+            supportFragmentManager.beginTransaction()
+                .replace(R.id.main_fragment_container, instance, tag)
+                .commit()
+        }
     }
 
     private fun showLocationSettings() {

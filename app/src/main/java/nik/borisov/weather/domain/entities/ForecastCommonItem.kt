@@ -2,9 +2,8 @@ package nik.borisov.weather.domain.entities
 
 data class ForecastCommonItem(
 
-    val localTimeEpoch: Long,
-    val timeZone: String,
+    val dateTimeInfo: DateTimeInfoItem,
     val location: LocationItem,
-    val currentWeather: CurrentWeatherItem,
-    val forecast: List<ForecastItem>
-    )
+    val forecastDays: List<ForecastDayItem>,
+    val forecastHours: List<ForecastHourItem>
+)

@@ -5,7 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
-import nik.borisov.weather.domain.usecases.DownloadForecastUseCase
+import nik.borisov.weather.domain.usecases.GetForecastUseCase
 import nik.borisov.weather.presentation.Mapper
 import nik.borisov.weather.presentation.models.ForecastCommonUi
 import nik.borisov.weather.presentation.viewmodels.states.*
@@ -13,63 +13,72 @@ import nik.borisov.weather.utils.DataResult
 import javax.inject.Inject
 
 class MainViewModel @Inject constructor(
-    private val downloadForecastUseCase: DownloadForecastUseCase,
+    private val getForecastUseCase: GetForecastUseCase,
     private val mapper: Mapper
 ) : ViewModel() {
 
-    private val _fragmentState = MutableLiveData<FragmentState>()
-    val fragmentState: LiveData<FragmentState>
-        get() = _fragmentState
+    private val _viewModelState = MutableLiveData<ViewModelState>()
+    val viewModelState: LiveData<ViewModelState>
+        get() = _viewModelState
 
     private val _forecast = MutableLiveData<ForecastCommonUi>()
     val forecast: LiveData<ForecastCommonUi>
         get() = _forecast
 
-    private var serviceState: ServiceState? = null
-    private var currentLocation: String? = null
+    private var _serviceState: ServiceState? = null
+    private val serviceState: ServiceState
+        get() = _serviceState ?: throw NullPointerException("ServiceState is null")
 
-    fun downloadForecast(location: String) {
-        currentLocation = location
+    fun getForecast(location: String?) {
         viewModelScope.launch {
-            val dataResult = downloadForecastUseCase.downloadForecast(location)
-            if (dataResult is DataResult.Success) {
-                _forecast.value = mapper.mapForecastCommonItemToUi(dataResult.data!!)
-                _fragmentState.value = ShowForecastFragment
-            } else {
-                _fragmentState.value = ShowErrorFragment(dataResult.message!!)
+            val dataResult =
+                getForecastUseCase.getForecast(location, serviceState)
+            when (dataResult) {
+                is DataResult.Success -> {
+                    _forecast.value = mapper.mapForecastCommonItemToUi(dataResult.data!!)
+                    _viewModelState.value = ShowForecastFragment
+                }
+                is DataResult.NetworkError -> {
+                    _viewModelState.value = ShowErrorFragment(dataResult.message!!)
+                }
+                is DataResult.DatabaseError -> {
+                    _viewModelState.value = ShowErrorFragment(dataResult.message!!)
+                }
+                is DataResult.LocationError -> {
+                    _viewModelState.value = ShowLocationFragment
+                }
+                is DataResult.Loading -> {}
             }
         }
+    }
+
+    fun retryGetForecast() {
+        _viewModelState.value = SetViewModelState
     }
 
     fun setServiceState(state: ServiceState) {
-        if (serviceState == null || serviceState != state) {
-            serviceState = state
-            updateStates()
+        _serviceState = state
+        refreshData()
+    }
+
+    fun refreshServiceState(state: ServiceState) {
+        if (_serviceState == null || serviceState != state) {
+            _serviceState = state
+            refreshData()
         }
     }
 
-    private fun updateStates() {
-        when (serviceState?.isNetworkEnabled) {
+    fun setViewModelState(state: ViewModelState) {
+        _viewModelState.value = state
+    }
+
+    private fun refreshData() {
+        when (serviceState.isLocationEnabled) {
             true -> {
-                when (serviceState?.isLocationEnabled) {
-                    true -> {
-                        _fragmentState.value = GetLocationFromService
-                    }
-                    false -> {
-                        //TODO get last location from DB
-                    }
-                    else -> {
-                        //TODO
-                        _fragmentState.value = ShowErrorFragment("")
-                    }
-                }
+                _viewModelState.value = GetLocationFromService
             }
             false -> {
-                //TODO get last forecast from DB
-            }
-            else -> {
-                //TODO
-                _fragmentState.value = ShowErrorFragment("")
+                getForecast(null)
             }
         }
     }

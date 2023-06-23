@@ -6,8 +6,6 @@ data class ForecastWeatherResponse(
 
     @SerializedName("location")
     val location: LocationDto,
-    @SerializedName("current")
-    val currentWeather: CurrentWeatherDto,
     @SerializedName("forecast")
     val forecast: ForecastCommonDto
 )

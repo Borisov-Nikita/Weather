@@ -4,30 +4,33 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.ListAdapter
 import com.squareup.picasso.Picasso
-import nik.borisov.weather.databinding.ForecastHourItemBinding
+import nik.borisov.weather.databinding.ForecastItemBinding
 import nik.borisov.weather.presentation.models.ForecastHourUi
 
 class ForecastHoursAdapter :
-    ListAdapter<ForecastHourUi, ForecastHourViewHolder>(ForecastHourDiffCallBack()) {
+    ListAdapter<ForecastHourUi, ForecastViewHolder>(ForecastHourDiffCallBack()) {
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ForecastHourViewHolder {
-        val binding = ForecastHourItemBinding.inflate(
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ForecastViewHolder {
+        val binding = ForecastItemBinding.inflate(
             LayoutInflater.from(parent.context),
             parent,
             false
         )
-        return ForecastHourViewHolder((binding))
+        return ForecastViewHolder((binding))
     }
 
-    override fun onBindViewHolder(holder: ForecastHourViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: ForecastViewHolder, position: Int) {
         val forecastHour = currentList[position]
         with(holder.binding) {
-            timeTextView.text = forecastHour.time
+            dateTimeTextView.text = forecastHour.time
             conditionTextView.text = forecastHour.conditionText
             tempTextView.text = forecastHour.temp
             Picasso.get()
                 .load(forecastHour.conditionIcon)
                 .into(weatherImageView)
+            windTextView.text = forecastHour.windSpeed
+            precipitationTextView.text = forecastHour.chanceOfPrecipitation
+            humidityTextView.text = forecastHour.humidity
         }
     }
 }

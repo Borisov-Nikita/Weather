@@ -14,6 +14,8 @@ import nik.borisov.weather.databinding.FragmentMainBinding
 import nik.borisov.weather.presentation.MainActivity
 import nik.borisov.weather.presentation.adapters.ForecastViewPagerAdapter
 import nik.borisov.weather.presentation.viewmodels.MainViewModel
+import nik.borisov.weather.presentation.viewmodels.states.SetViewModelState
+import nik.borisov.weather.presentation.viewmodels.states.ShowLocationFragment
 
 class MainFragment : Fragment() {
 
@@ -48,6 +50,7 @@ class MainFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         setupViewPager()
         observeViewModel()
+        setupClickListeners()
     }
 
     override fun onDestroy() {
@@ -69,15 +72,34 @@ class MainFragment : Fragment() {
 
     private fun observeViewModel() {
         viewModel.forecast.observe(viewLifecycleOwner) {
-            with(binding) {
-                dateTextView.text = it.currentWeather.lastUpdate
+            with(binding.currentWeatherLayout) {
+                dateTimeTextView.text = it.currentWeather.lastUpdate
                 Picasso.get()
                     .load(it.currentWeather.conditionIcon)
                     .into(weatherImageView)
-                locationTextView.text = it.location
                 tempTextView.text = it.currentWeather.temp
                 conditionTextView.text = it.currentWeather.conditionText
-                maxMinTempTextView.text = "TODO"
+                feelsLikeTempTextView.text = it.currentWeather.tempFeelsLike
+                windTextView.text = it.currentWeather.windSpeed
+                precipitationTextView.text = it.currentWeather.chanceOfPrecipitation
+                humidityTextView.text = it.currentWeather.humidity
+            }
+            binding.collapsingToolbarLayout.title = it.location
+        }
+    }
+
+    private fun setupClickListeners() {
+        binding.toolbar.setOnMenuItemClickListener {
+            when (it.itemId) {
+                R.id.search_location_menu_item -> {
+                    viewModel.setViewModelState(ShowLocationFragment)
+                    true
+                }
+                R.id.refresh_forecast_menu_item -> {
+                    viewModel.setViewModelState(SetViewModelState)
+                    true
+                }
+                else -> false
             }
         }
     }
